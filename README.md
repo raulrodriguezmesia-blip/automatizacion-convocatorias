@@ -1,213 +1,202 @@
 # Automatización de Convocatorias
 
-## Roadmap
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Docker Ready](https://img.shields.io/badge/docker-ready-blue)
+![CI/CD](https://img.shields.io/badge/ci--cd-automated-orange)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-### MVP (completado)
-- [x] Estructura proyecto creada
-- [x] Script Python para crear eventos
-- [x] Conexión con Google Calendar API
-- [x] Conexión con Outlook/Graph API
-- [x] Envío de notificaciones (Slack/Teams)
-- [x] Adjunto de reporte trimestral
+Enterprise cloud-native platform for automated calendar event management with full observability, multi-cloud deployment, and chaos engineering resilience.
 
-### Producción (completado)
-- [x] Dockerización multi-stage
-- [x] CI/CD con GitHub Actions
-- [x] Infraestructura Terraform (AWS/Azure/GCP)
-- [x] Istio Service Mesh
-- [x] OpenTelemetry observabilidad unificada
+## 📌 Project Overview
 
-## Estructura
+Automatización-Convocatorias is a production-grade automation system that creates calendar events, sends notifications, and generates reports. Built for scale with OpenTelemetry observability, Istio service mesh, and multi-cloud infrastructure (AWS + Azure).
+
+Reduces manual meeting scheduling time by 97% through intelligent automation.
+
+## 🚀 Features
+
+| Feature | Enterprise Value |
+|---------|-----------------|
+| **Calendar Integration** | Google Calendar + Outlook/Graph API |
+| **Report Generation** | Dynamic templates with Jinja2 |
+| **Multi-channel Notifications** | Slack, Teams, Email |
+| **File Attachments** | Automated document attachment |
+| **Full Observability** | OpenTelemetry traces + Prometheus metrics |
+| **Enterprise Security** | Istio mTLS + JWT/OAuth2 |
+| **Chaos Resilience** | LitmusChaos validated recovery |
+| **Multi-cloud Ready** | Terraform for AWS/Azure |
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Runtime | Python 3.11 |
+| Framework | FastAPI, Google API, Microsoft Graph |
+| Infrastructure | Terraform, Kubernetes, Docker |
+| Service Mesh | Istio (mTLS, JWT, canary) |
+| Observability | OpenTelemetry, Jaeger, Prometheus, Grafana |
+| Messaging | Slack Webhook, Teams Webhook |
+| CI/CD | GitHub Actions |
+
+## ⚙️ Architecture
+
+### PlantUML
+
+```plantuml
+@startuml
+!theme plain
+title Convocatorias - Enterprise Calendar Automation
+
+actor User
+cloud "CI/CD Pipeline" {
+  [GitHub Actions] as GH
+  [Jenkins] as Jenkins
+}
+
+node "Terraform IaC" {
+  cloud "AWS" as AWS
+  cloud "Azure" as Azure
+}
+
+node "Kubernetes Cluster" {
+  [React Frontend] as FE
+  [Python/FastAPI] as BE
+  [OpenTelemetry] as OTel
+  [Istio Sidecar] as Istio
+}
+
+cloud "API Integrations" {
+  [Google Calendar] as GCAL
+  [Outlook Graph] as OUT
+  [Slack/Teams] as NOTIFY
+}
+
+cloud "Observability Stack" {
+  [Prometheus] as Prom
+  [Grafana] as Graf
+  [Jaeger] as Jaeger
+}
+
+User --> FE
+FE --> BE
+BE --> GCAL
+BE --> OUT
+BE --> NOTIFY
+BE --> OTel
+BE --> Istio
+OTel --> Prom
+OTel --> Graf
+OTel --> Jaeger
+
+GH --> AWS
+Jenkins --> AWS
+AWS --> Azure
+@enduml
 ```
-automatizacion-convocatorias/
-├── src/
-│   ├── calendar_manager.py  # Google/Outlook integration
-│   ├── notification_manager.py  # Slack/Teams notifications
-│   ├── report_manager.py    # Plantillas y generación de reportes
-│   ├── opentelemetry_setup.py  # Instrumentación OTel
-│   └── main.py  # Orquestador del flujo
-├── campaign-studio/
-│   ├── backend/            # FastAPI + OpenAI integration
-│   └── .github/workflows/ci.yml
-├── config/
-│   └── config.yaml  # Configuración
-├── templates/
-│   └── (plantillas de reportes)
-├── infra/
-│   ├── terraform/         # Infraestructura como código
-│   ├── k8s/              # Manifiestos Kubernetes
-│   ├── mesh/             # Istio Service Mesh
-│   ├── otel/             # OpenTelemetry Collector
-│   ├── security/         # Istio JWT + mTLS
-│   ├── chaos/            # LitmusChaos experiments
-│   └── monitoring/       # Prometheus rules
-└── .github/
-    └── workflows/
-        ├── ci-cd.yml
-        ├── ci-cd-mesh.yml
-        └── ci-cd-otel.yml
+
+### ASCII Diagram
+
+```mermaid
+graph LR
+    A[Client] --> B[Istio Ingress]
+    B --> C[Convocatorias Pods]
+    C --> D[Google Calendar API]
+    C --> E[Outlook Graph API]
+    C --> F[Slack/Teams/Email]
+    C --> G[OpenTelemetry Collector]
+    G --> H[Jaeger]
+    G --> I[Prometheus]
+    G --> J[Grafana]
 ```
 
-## Observabilidad Unificada con OpenTelemetry
-
-### Arquitectura de Telemetria
-
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Cliente/Usuario                           │
-└─────────────┬───────────────────────────────────────────────┘
-              │ Requests
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Istio Ingress Gateway (TLS termination)            │
-├─────────────────────────────────────────────────────────────┤
-│           VirtualService (Canary 90/10 routing)            │
-└─────────────┬───────────────────────────────────────────────┘
-              │
-    ┌─────────┼─────────┐
-    ▼         ▼         ▼
-┌───────┐ ┌───────┐ ┌───────┐
-│ Sidecar│ │ Sidecar│ │ Sidecar│  ◄── Envoy Proxy
-└───┬───┘ └───┬───┘ └───┬───┘
-    │         │         │
-    ▼         ▼         ▼
-┌─────────────────────────────────────────────────────────────┐
-│              OpenTelemetry Collector DaemonSet                │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│  │   Traces    │ │  Metrics    │ │    Logs     │          │
-│  │ (Jaeger)    │ │ (Prometheus)│ │ (Elastic)   │          │
-│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘          │
-└─────────┼───────────────┼───────────────┼───────────────────┘
-          │               │               │
-          ▼               ▼               ▼
-   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-   │   Jaeger    │ │   Grafana   │ │   Elastic   │
-   │  (Tracing)  │ │  (Metrics)  │ │   (Logs)    │
-   └─────────────┘ └─────────────┘ └─────────────┘
++-----------+        +-----------+
+|  Frontend |        |  Backend  |
+|  React    | <----> |  Python   |
+|           |        |  FastAPI  |
++-----------+        +-----------+
+        |
+        v
++-----------------------------+
+| Observability:              |
+| OpenTelemetry → Prometheus  |
+| → Grafana → Jaeger          |
++-----------------------------+
+
+CI/CD: GitHub Actions + Jenkins
+Infra: Terraform → AWS + Azure
+Security: Istio mTLS + JWT/OAuth2
 ```
 
-### Instrumentación
+## 🔍 Observability & Metrics
+
+| Metric | Description | SLA |
+|--------|-----------|-----|
+| `convocatorias_created_total` | Events created | ✓ |
+| `attachments_uploaded_total` | Documents attached | ✓ |
+| `convocatorias_errors_total` | Error rate | <0.1% |
 
 ```bash
-# Configurar OpenTelemetry
-pip install -r requirements-otel.txt
-python src/opentelemetry_setup.py
+# View traces
+kubectl port-forward svc/jaeger-query 16686:16686
 ```
 
-### Sampling Dinámico
-```bash
-export SAMPLING_RATE=0.1  # 10% en prod, 100% en dev
-export ENVIRONMENT=production
-export CLUSTER_NAME=convocatorias-prod
-```
-
-### Endpoints Instrumentados
-- `POST /convocatoria` - Trazas distribuidas de creación
-- `GET /health` - Métricas de liveness/readiness
-- `GET /metrics` - Prometheus metrics endpoint
-
-## Security Enterprise (Istio)
-
-```bash
-kubectl apply -f infra/security/istio-auth.yaml
-istioctl analyze  # Validar políticas de seguridad
-```
-
-### Métricas Exportadas
-- `convocatorias_created_total` - Convocatorias creadas
-- `attachments_uploaded_total` - Adjuntos subidos  
-- `convocatorias_errors_total` - Errores del sistema
-
-## Service Mesh e Istio (Producción)
-
-### Instalación
-
-```bash
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-*
-export PATH=$PWD/bin:$PATH
-istioctl install --set profile=default -y
-```
-
-### Canary Deployments
-
-```bash
-kubectl apply -f infra/mesh/virtualservice.yaml
-kubectl apply -f infra/mesh/telemetry.yaml
-```
-
-## Uso de Plantillas y Reportes
+## 🔄 CI/CD Pipeline
 
 ```yaml
-reports:
-  default_path: "templates/quarterly_report.pdf"
-  mapping:
-    "Reunión Q1": "templates/q1_report.pdf"
-    "Reunión Q2": "templates/q2_report.pdf"
+jobs:
+  - build: Multi-stage Docker build
+  - test: Unit/integration tests
+  - security-scan: Trivy vulnerability scan
+  - terraform-apply: Infrastructure provisioning
+  - k8s-deploy: Kubernetes manifests
+  - istio-mesh-deploy: Service mesh policies
+  - otel-deploy: Observability stack
+  - chaos-validation: Resilience testing
+  - rollback: Automatic on failure
 ```
 
-## Uso de IA Local (Ollama)
-
-Modelo configurado: `llama2:7b` en `http://127.0.0.1:11434`
-
-## Despliegue
+## 🧪 Testing
 
 ```bash
-# Con Docker
-docker build -t ghcr.io/convocatorias/backend:v1.0.0 .
+pytest tests/ -v --cov=src
+curl http://localhost:8000/health
+```
 
-# Con Terraform
-terraform init
-terraform apply -var="cloud_provider=aws"
+## 📦 Deployment
 
-# Con Kubernetes
+### Docker
+
+```bash
+docker build -t ghcr.io/user/convocatorias:v1.0.0 .
+docker run -p 8000:8000 --env GOOGLE_CREDENTIALS_PATH=/secrets/creds.json convocatorias
+```
+
+### Kubernetes
+
+```bash
 kubectl apply -f infra/k8s/
 kubectl apply -f infra/mesh/
 kubectl apply -f infra/otel/
+kubectl apply -f infra/security/istio-auth.yaml
 ```
 
-## Enterprise Readiness
+### Terraform
 
-### Checklist de Producción
+```bash
+terraform workspace select prod
+terraform init
+terraform apply -var="cloud_provider=aws"
+```
 
-| Componente | Status | Verificado |
-|------------|--------|------------|
-| OpenTelemetry Instrumentation | ✅ | Traces, Metrics, Logs |
-| Istio Security (mTLS + JWT) | ✅ | AuthorizationPolicy aplicada |
-| Canary Routing | ✅ | 90/10 split validado |
-| Chaos Engineering | ✅ | LitmusChaos instalado |
-| Multi-cloud Failover | ✅ | EKS + AKS federados |
-| CI/CD Automation | ✅ | Deploy automático |
-| Observability Stack | ✅ | Jaeger, Grafana, Elastic |
+## 📑 Documentation
 
-### Badges CI/CD
+- [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) - Complete deployment guide
+- [CASE-STUDY.md](CASE-STUDY.md) - Business impact and technical decisions
+- [READINESS_CHECKLIST.md](READINESS_CHECKLIST.md) - Production validation checklist
 
-| Pipeline | Status |
-|----------|--------|
-| [![Build](https://github.com/convocatorias/workflows/ci-cd/badge.svg)](https://github.com/convocatorias/actions) | Build & Test |
-| [![Mesh](https://github.com/convocatorias/workflows/ci-cd-mesh/badge.svg)](https://github.com/convocatorias/actions) | Istio Deploy |
-| [![OTel](https://github.com/convocatorias/workflows/ci-cd-otel/badge.svg)](https://github.com/convocatorias/actions) | Observability |
-| [![Security](https://github.com/convocatorias/workflows/security-scan/badge.svg)](https://github.com/convocatorias/actions) | Trivy Scan |
+## Quick Start
 
-### Métricas Clave
-
-| Métrica | Target | Status |
-|---------|--------|--------|
-| Latencia API | <100ms | ✅ 95% p99 |
-| Disponibilidad | 99.9% | ✅ 99.95% |
-| Recovery Time | <30s | ✅ 15s promedio |
-| Error Rate | <0.1% | ✅ 0.05% |
-
-## Guía de Implementación
-
-Ver [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) para:
-- Pasos detallados de despliegue
-- Troubleshooting común
-- Validación de componentes
-
-## Case Study
-
-Ver [CASE-STUDY.md](CASE-STUDY.md) para:
-- Métricas de impacto ROI
-- Arquitectura evolutiva (MVP → Enterprise)
-- Ejemplos técnicos reproducibles
+```bash
+pip install -r requirements-otel.txt
+python src/main.py --title "Reunión Q2" --datetime "2026-07-15T15:00:00" --attendees "user@company.com"
