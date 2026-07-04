@@ -1,0 +1,68 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: convocatorias-pod-delete
+  namespace: convocatorias
+spec:
+  definition:
+    scope: namespaced
+    image: litmuschaos/chaos-go-runner:latest
+    args:
+    - name: POD_LABEL
+      value: "app=convocatorias"
+    - name: TOTAL_CHAOS_DURATION
+      value: "30"
+    - name: CHAOS_INTERVAL
+      value: "10"
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: convocatorias-network-latency
+  namespace: convocatorias
+spec:
+  definition:
+    scope: namespaced
+    image: litmuschaos/chaos-go-runner:latest
+    args:
+    - name: POD_LABEL
+      value: "app=convocatorias"
+    - name: NETWORK_DELAY
+      value: "2000ms"
+    - name: TOTAL_CHAOS_DURATION
+      value: "60"
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: convocatorias-pod-cpu-hog
+  namespace: convocatorias
+spec:
+  definition:
+    scope: namespaced
+    image: litmuschaos/chaos-go-runner:latest
+    args:
+    - name: POD_LABEL
+      value: "app=convocatorias"
+    - name: CPU_LOAD_PERCENTAGE
+      value: "90"
+    - name: TOTAL_CHAOS_DURATION
+      value: "60"
+---
+apiVersion: batch/v1
+kind: Workflow
+metadata:
+  name: convocatorias-chaos-weekly
+  namespace: convocatorias
+spec:
+  schedule: "0 9 * * 1"  # Every Monday at 9 AM
+  deadline: 60
+  workflows:
+  - name: pod-delete-test
+    templateName: convocatorias-pod-delete
+  - name: network-latency-test
+    templateName: convocatorias-network-latency
+    dependsOn: pod-delete-test
+  - name: cpu-hog-test
+    templateName: convocatorias-pod-cpu-hog
+    dependsOn: network-latency-test

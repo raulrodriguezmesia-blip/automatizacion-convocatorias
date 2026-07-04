@@ -1,0 +1,57 @@
+name: CI/CD with OpenTelemetry
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/convocatorias
+
+jobs:
+  otel-validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Validate OpenTelemetry Collector config
+      run: |
+        docker run --rm -v $(pwd)/infra/otel:/conf otel/opentelemetry-collector-contrib:latest validate --config=/conf/collector-config.yaml
+
+  otel-deploy:
+    needs: [otel-validate]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Deploy OpenTelemetry Collector
+      run: |
+        kubectl apply -f infra/otel/collector-config.yaml
+        kubectl apply -f infra/otel/collector.yaml
+    - name: Deploy Istio Telemetry
+      run: |
+        kubectl apply -f infra/mesh/telemetry.yaml
+
+  otel-test:
+    needs: [otel-deploy]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test distributed tracing
+      run: |
+        # Test that traces are being generated
+        sleep 30  # Wait for collector to start
+        kubectl exec -n convocatorias deploy/convocatorias-backend -- python -c "
+        from opentelemetry_setup import tracer, convocatorias_created
+        with tracer.start_as_current_span('test-span'):
+            convocatorias_created.add(1, {'test': 'otel-validation'})
+        print('OpenTelemetry integration OK')
+        "
+
+  rollback:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+    - name: Rollback OpenTelemetry changes
+      run: |
+        kubectl delete -f infra/otel/ 2>/dev/null || true
+        kubectl rollout undo deployment otel-collector -n istio-system

@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: istio-system
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: 'convocatorias'
+            kubernetes_sd_configs:
+            - role: pod
+            relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__address__]
+              action: replace
+              regex: ([^:]+)(?::\d+)?$
+              target_label: __address__
+              replacement: $1:8000
+    
+    processors:
+      batch:
+        timeout: 5s
+        send_batch_size: 1000
+      memory_limiter:
+        limit_mib: 400
+        spike_limit_mib: 100
+      attributes:
+        actions:
+        - key: environment
+          value: ${ENVIRONMENT}
+          action: upsert
+        - key: cluster
+          value: ${CLUSTER_NAME}
+          action: upsert
+      probabilistic_sampler:
+        sampling_percentage: ${SAMPLING_RATE}
+      span_metrics:
+        metrics_instance: span-metrics
+    
+    exporters:
+      jaeger:
+        endpoint: jaeger-collector.istio-system.svc.cluster.local:14250
+        tls:
+          insecure: true
+      prometheusremotewrite:
+        endpoint: http://prometheus-operated.monitoring.svc.cluster.local:9090/api/v1/write
+      datadog:
+        api:
+          key: ${DATADOG_API_KEY}
+          site: datadoghq.com
+      elasticsearch:
+        endpoint: ${ELASTIC_ENDPOINT}
+        tls:
+          insecure: false
+      otlp:
+        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-otel-collector.istio-system.svc.cluster.local:4317}
+    
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [probabilistic_sampler, batch, attributes]
+          exporters: [jaeger, otlp]
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [batch, attributes, span_metrics]
+          exporters: [prometheusremotewrite, datadog]
+        logs:
+          receivers: [otlp]
+          processors: [batch, attributes]
+          exporters: [elasticsearch]

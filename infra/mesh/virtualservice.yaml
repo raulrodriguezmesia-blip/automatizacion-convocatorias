@@ -1,0 +1,53 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: convocatorias-api
+spec:
+  hosts:
+  - convocatorias-service.convocatorias.svc.cluster.local
+  gateways:
+  - convocatorias-gateway
+  http:
+  - route:
+    - destination:
+        host: convocatorias-service.convocatorias.svc.cluster.local
+        subset: v1
+      weight: 90
+    - destination:
+        host: convocatorias-service.convocatorias.svc.cluster.local
+        subset: v2
+      weight: 10
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retry-received
+    fault:
+      delay:
+        percentage:
+          value: 0.1
+        fixedDelay: 5s
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: convocatorias-api
+spec:
+  host: convocatorias-service.convocatorias.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 1000
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2

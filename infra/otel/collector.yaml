@@ -1,0 +1,49 @@
+# OpenTelemetry Collector DaemonSet
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: opentelemetry-collector
+  namespace: istio-system
+  labels:
+    app: opentelemetry
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry
+  template:
+    metadata:
+      labels:
+        app: opentelemetry
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8888"
+    spec:
+      containers:
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:latest
+        args:
+        - "--config=/conf/config.yaml"
+        env:
+        - name: SAMPLING_RATE
+          value: "0.1"
+        volumeMounts:
+        - name: otel-config
+          mountPath: /conf
+        ports:
+        - containerPort: 4317
+          name: otlp-grpc
+        - containerPort: 4318
+          name: otlp-http
+        - containerPort: 8888
+          name: prometheus
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: otel-config
+        configMap:
+          name: otel-collector-config

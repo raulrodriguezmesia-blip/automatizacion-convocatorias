@@ -1,0 +1,32 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: convocatorias-mtls
+  namespace: convocatorias
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: convocatorias-auth
+  namespace: convocatorias
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/convocatorias/sa/convocatorias-service-account"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/convocatoria", "/health"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: convocatorias-service-account
+  namespace: convocatorias

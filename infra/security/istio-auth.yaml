@@ -1,0 +1,74 @@
+# Istio RequestAuthentication JWT
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: convocatorias-jwt
+  namespace: convocatorias
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias
+  jwtRules:
+  - issuer: "https://auth.convocatorias.com/"
+    jwksUri: "https://auth.convocatorias.com/.well-known/jwks.json"
+---
+# Authorization Policy
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: convocatorias-auth
+  namespace: convocatorias
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["*"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/health", "/metrics"]
+    when:
+    - key: request.auth.claims[role]
+      values: ["admin", "service-account"]
+  - to:
+    - operation:
+        methods: ["POST"]
+        paths: ["/convocatoria"]
+    when:
+    - key: request.auth.claims[role]
+      values: ["admin", "organizer"]
+---
+# Istio Telemetry for enhanced observability
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: convocatorias-telemetry
+  namespace: convocatorias
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias
+  metrics:
+  - providers:
+    - name: prometheus
+    overrides:
+    - match:
+        metric: REQUEST_COUNT
+      tagOverrides:
+        request_operation:
+          value: "request.operation"
+  accessLogging:
+  - providers:
+    - name: otel
+    format: |
+      {
+        "timestamp": "%START_TIME%",
+        "route": "%REQ(:path)%",
+        "method": "%REQ(:method)%",
+        "status": "%RESP(code)%",
+        "latency": "%DURATION%",
+        "trace_id": "%REQ(X-B3-TraceId)%"
+      }

@@ -1,0 +1,62 @@
+name: CI/CD with Service Mesh
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/convocatorias
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run pytest
+      run: |
+        python -m pytest tests/ -v
+
+  mesh-deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Istio
+      run: |
+        curl -L https://istio.io/downloadIstio | sh -
+        sudo cp istio-*/bin/istioctl /usr/local/bin/
+    - name: Deploy Service Mesh
+      run: |
+        kubectl apply -f infra/mesh/gateway.yaml
+        kubectl apply -f infra/mesh/virtualservice.yaml
+        kubectl apply -f infra/mesh/security.yaml
+
+  canary-test:
+    needs: [mesh-deploy]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate canary traffic split
+      run: |
+        # Validate 90/10 split
+        istioctl analyze infra/mesh/virtualservice.yaml
+
+  rollback:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+    - name: Rollback to previous version
+      run: |
+        kubectl rollout undo deployment/convocatorias-backend -n convocatorias

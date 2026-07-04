@@ -1,0 +1,19 @@
+prometheus:
+  # Convocatorias Rate Metrics
+  - name: Convocatorias Creation Rate
+    query: sum(rate(convocatorias_created_total[5m])) by (status)
+    
+  # Error Rate
+  - name: Error Rate
+    query: sum(rate(convocatorias_errors_total[5m])) by (error)
+    
+  # Latency Histogram
+  - name: 99th Percentile Latency
+    query: histogram_quantile(0.99, sum(rate(convocatorias_duration_seconds_bucket[5m])) by (le))
+    
+  # Resource Utilization
+  - name: CPU Usage
+    query: sum(rate(container_cpu_usage_seconds_total{container="backend"}[5m])) by (pod)
+    
+  - name: Memory Usage
+    query: sum(container_memory_working_set_bytes{container="backend"}) by (pod)

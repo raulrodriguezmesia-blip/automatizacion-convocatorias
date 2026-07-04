@@ -1,0 +1,7 @@
+reports:
+    default_path: "templates/quarterly_report.pdf"
+    mapping:
+      "Reunión Q1": "templates/q1_report.pdf"
+      "Reunión Q2": "templates/q2_report.pdf"
+      "Reunión Q3": "templates/q3_report.pdf"
+      "Reunión Q4": "templates/q4_report.pdf"

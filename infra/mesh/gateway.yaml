@@ -1,0 +1,43 @@
+# Istio Installation and Configuration for Convocatorias
+
+# Install Istio with default profile
+# istioctl install --set profile=default -y
+
+# Enable sidecar injection for convocatorias namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: convocatorias
+  labels:
+    istio-injection: enabled
+---
+# Gateway for external access
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: convocatorias-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialRefs:
+      - name: convocatorias-tls
+    hosts:
+    - "*.convocatorias.com"
+---
+# TLS Secret (should be provisioned via cert-manager)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: convocatorias-tls
+  namespace: istio-system
+type: kubernetes.io/tls
+data:
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t...
+  tls.crt: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t...

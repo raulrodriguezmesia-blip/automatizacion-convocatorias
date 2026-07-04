@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: convocatorias-alerts
+spec:
+  groups:
+  - name: convocatorias.rules
+    rules:
+    - alert: HighErrorRate
+      expr: rate(convocatorias_errors_total[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High error rate in convocatorias service"
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total{namespace="default"}[10m]) > 0.5
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Convocatorias pod is crash looping"

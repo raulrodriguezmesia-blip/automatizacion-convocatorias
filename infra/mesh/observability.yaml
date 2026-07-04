@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-query
+  namespace: istio-system
+spec:
+  ports:
+  - name: query
+    port: 16686
+    targetPort: 16686
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: convocatorias-monitor
+  namespace: convocatorias
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+# Grafana Dashboard for Istio metrics
+# Dashboard JSON would be imported via Grafana UI or ConfigMap

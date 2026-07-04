@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: convocatorias-config
+data:
+  CALENDAR_PROVIDER: "google"
+  TIMEZONE: "America/Bogota"
+  LOG_LEVEL: "INFO"
+  MYSQL_HOST: "localhost"
+  MYSQL_PORT: "3306"
+  MYSQL_DB: "convocatorias"

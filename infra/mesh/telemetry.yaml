@@ -1,0 +1,18 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: convocatorias-telemetry
+  namespace: convocatorias
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias
+  metrics:
+  - providers:
+    - name: prometheus
+  tracing:
+  - providers:
+    - name: otel
+  accessLogging:
+  - providers:
+    - name: otel
