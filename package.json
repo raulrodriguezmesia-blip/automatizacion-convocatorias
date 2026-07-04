@@ -1,0 +1,15 @@
+{
+    "title": "Automatización de Convocatorias",
+    "description": "Sistema automatizado para crear eventos y enviar notificaciones",
+    "version": "0.1.0",
+    "scripts": {
+        "create-event": "python src/calendar_manager.py create",
+        "notify": "python src/notification_manager.py send",
+        "run": "python src/main.py"
+    },
+    "dependencies": {
+        "google-api-python-client": "^2.0.0",
+        "msal": "^1.28.0",
+        "requests": "^2.31.0"
+    }
+}

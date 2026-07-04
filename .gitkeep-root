@@ -1,0 +1,8 @@
+src/
+config/
+templates/
+infra/
+.github/
+*.md
+requirements*.txt
+.gitignore
