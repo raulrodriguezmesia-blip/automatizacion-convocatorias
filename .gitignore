@@ -50,6 +50,7 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Kubernetes (kubeconfig)
-kubeconfig
-*.kubeconfig
+# Repository separation
+campaign-studio/
+mvp-fastapi/
+mvp-fastapi*.py
