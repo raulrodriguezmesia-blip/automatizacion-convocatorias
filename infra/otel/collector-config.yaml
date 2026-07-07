@@ -64,7 +64,7 @@ data:
         tls:
           insecure: false
       otlp:
-        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-otel-collector.istio-system.svc.cluster.local:4317}
+        endpoint: otel-collector.istio-system.svc.cluster.local:4317
     
     service:
       pipelines:
