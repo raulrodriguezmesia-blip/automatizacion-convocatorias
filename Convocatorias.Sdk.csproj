@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <PackageId>Convocatorias.Sdk</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Automatización-Convocatorias</Authors>
+    <Company>Automatización-Convocatorias</Company>
+    <Description>Official .NET SDK for the Convocatorias Platform</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/automatizacion-convocatorias/sdks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/automatizacion-convocatorias/sdks.git</RepositoryUrl>
+    <PackageTags>convocatorias sdk api client</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+</Project>
