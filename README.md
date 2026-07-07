@@ -251,6 +251,32 @@ flowchart LR
 
 ---
 
+## 📦 Deployment Manifests
+
+Los siguientes archivos están disponibles para el despliegue:
+
+| Archivo | Descripción | Uso |
+|---------|-------------|-----|
+| `docker-compose.yml` | Orquestamiento de servicios locales | `docker-compose up -d` |
+| `Dockerfile` (cada servicio) | Build multi-stage para cada microservicio | Imágenes Docker |
+| `helm-chart/` | Charts Helm para despliegue K8s | `helm install convocatorias ./helm-chart/convocatorias-ai` |
+
+### Despliegue Local
+```bash
+docker-compose up -d
+# Verificar: curl http://localhost:8080/actuator/health
+```
+
+### Despliegue Producción
+```bash
+helm upgrade --install convocatorias ./helm-chart/convocatorias-ai \
+  --namespace convocatorias-prod \
+  --create-namespace \
+  --set image.tag=v1.0.0
+```
+
+---
+
 ## 🤝 Contribuir
 
 1. Fork del repositorio

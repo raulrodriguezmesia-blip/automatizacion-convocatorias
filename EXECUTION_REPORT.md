@@ -123,10 +123,14 @@ node_modules/  # Dependencias Node.js
 
 ### Próximos pasos
 
-- [ ] Incluir `docker-compose.yml` y `Dockerfile` en el repositorio (actualmente en .gitignore)
+- [x] Incluir `docker-compose.yml` y `Dockerfile` en el repositorio (actualizado)
 - [ ] Commit y push de cambios pendientes en submodule `automatizacion-convocatorias`
 - [ ] Verificar despliegue de SDK en GitHub Packages / Maven Central
 
 ---
+
+**Nota:** Docker manifests incluidos para trazabilidad de despliegue.
+
+---
 *Actualización ejecutada por Senior DevOps Engineer*
-*Hash de commit actual: `5e56703`*
+*Hash de commit actual: `8d82f21`*
