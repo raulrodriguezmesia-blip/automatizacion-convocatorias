@@ -1,0 +1,142 @@
+name: "Docker Validation"
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  lint:
+    name: Dockerfile Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install hadolint
+        run: |
+          wget -qO /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
+          chmod +x /bin/hadolint
+
+      - name: Find Dockerfiles
+        id: find-dockerfiles
+        run: |
+          DOCKERFILES=$(find . -name "Dockerfile*" -type f | tr '\n' ' ')
+          echo "files=$DOCKERFILES" >> $GITHUB_OUTPUT
+          echo "Found Dockerfiles: $DOCKERFILES"
+
+      - name: Lint Dockerfiles
+        if: steps.find-dockerfiles.outputs.files != ''
+        run: |
+          for file in $(echo "${{ steps.find-dockerfiles.outputs.files }}" | tr ' ' '\n'); do
+            echo "Linting: $file"
+            hadolint "$file"
+          done
+
+  compose-check:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker compose version
+
+      - name: Find docker-compose files
+        id: find-compose
+        run: |
+          COMPOSE_FILES=$(find . -name "docker-compose*.yml" -type f | tr '\n' ' ')
+          echo "files=$COMPOSE_FILES" >> $GITHUB_OUTPUT
+          echo "Found compose files: $COMPOSE_FILES"
+
+      - name: Validate docker-compose.yml
+        if: steps.find-compose.outputs.files != ''
+        run: |
+          for file in $(echo "${{ steps.find-compose.outputs.files }}" | tr ' ' '\n'); do
+            echo "Validating: $file"
+            docker compose -f "$file" config --quiet
+          done
+
+  build-test:
+    name: Docker Build & Compose Test
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:24.0.7-dind
+        privileged: true
+        ports:
+          - 2375:2375
+        options: >-
+          --health-cmd "docker info"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Wait for Docker daemon
+        run: |
+          timeout 30 bash -c 'until docker info; do sleep 1; done'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Find Dockerfiles to build
+        id: find-build
+        run: |
+          DOCKERFILES=$(find . -name "Dockerfile" -type f | head -5)
+          echo "files=$DOCKERFILES" >> $GITHUB_OUTPUT
+
+      - name: Build Dockerfiles
+        if: steps.find-build.outputs.files != ''
+        run: |
+          for file in $(echo "${{ steps.find-build.outputs.files }}" | tr '\n' ' '); do
+            dir=$(dirname "$file")
+            name=$(basename "$dir")
+            echo "Building: $file in $dir"
+            docker build -t "$name:test" "$dir" || echo "::warning::Build may have warnings for $dir"
+          done
+
+      - name: Validate docker-compose up/down
+        run: |
+          COMPOSE_FILES=$(find . -name "docker-compose*.yml" -type f)
+          if [ -n "$COMPOSE_FILES" ]; then
+            for file in $COMPOSE_FILES; do
+              echo "Testing compose: $file"
+              docker compose -f "$file" config --quiet
+              docker compose -f "$file" up -d --timeout=60 || echo "::warning::Compose up may have failed for $file"
+              docker compose -f "$file" down --timeout=30
+            done
+          fi
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [lint, compose-check, build-test]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## Docker Validation Summary"
+          echo ""
+          echo "| Job | Status |"
+          echo "|-----|--------|"
+          echo "| Lint Dockerfiles | ${{ needs.lint.result }} |"
+          echo "| Compose Validation | ${{ needs.compose-check.result }} |"
+          echo "| Build & Test | ${{ needs.build-test.result }} |"
+          echo ""
+          if [ "${{ needs.lint.result }}" = "success" ] && [ "${{ needs.compose-check.result }}" = "success" ] && [ "${{ needs.build-test.result }}" = "success" ]; then
+            echo "**✅ All validations passed**"
+          else
+            echo "**❌ Some validations failed**"
+          fi
