@@ -31,6 +31,42 @@
 30 passed
 ```
 
+### Unitarias (detallado) — `pytest tests/ -v`
+```
+tests/test_ai_metrics.py::test_record_prediction_runs PASSED
+tests/test_ai_metrics.py::test_update_accuracy_runs PASSED
+tests/test_ai_metrics.py::test_drift_detection_first_call_no_alert PASSED
+tests/test_ai_metrics.py::test_drift_detection_triggers_on_shift PASSED
+tests/test_ai_metrics.py::test_drift_monitor PASSED
+tests/test_ai_metrics.py::test_metrics_output_format PASSED
+tests/test_billing.py::test_track_event PASSED
+tests/test_billing.py::test_get_usage_summary PASSED
+tests/test_billing.py::test_pricing_tiers PASSED
+tests/test_billing.py::test_invoice_generation PASSED
+tests/test_billing.py::test_invoice_export_csv PASSED
+tests/test_config_declarative.py::test_valid_config_passes PASSED
+tests/test_config_declarative.py::test_invalid_color_fails PASSED
+tests/test_config_declarative.py::test_missing_required_branding_fails PASSED
+tests/test_config_declarative.py::test_merge_with_defaults PASSED
+tests/test_config_declarative.py::test_render_ui_config PASSED
+tests/test_config_declarative.py::test_evaluate_workflow_match PASSED
+tests/test_config_declarative.py::test_evaluate_workflow_no_match PASSED
+tests/test_marketplace.py::test_publish_and_list_template PASSED
+tests/test_marketplace.py::test_download_template_increments PASSED
+tests/test_marketplace.py::test_rate_template PASSED
+tests/test_marketplace.py::test_publish_and_install_integration PASSED
+tests/test_marketplace.py::test_install_integration_idempotent PASSED
+tests/test_tenant_manager.py::test_create_tenant PASSED
+tests/test_tenant_manager.py::test_duplicate_subdomain_fails PASSED
+tests/test_tenant_manager.py::test_get_tenant_by_subdomain PASSED
+tests/test_tenant_manager.py::test_update_config PASSED
+tests/test_tenant_manager.py::test_add_user PASSED
+tests/test_tenant_manager.py::test_record_and_get_usage PASSED
+tests/test_tenant_manager.py::test_deactivate_tenant PASSED
+
+============================== 30 passed, 46 warnings in 5.98s =======================
+```
+
 ### End-to-End — `tests/e2e_demo.py`
 ```
 [1] SaaS - Creacion de Tenant          [PASS]
@@ -131,6 +167,8 @@ node_modules/  # Dependencias Node.js
 
 **Nota:** Docker manifests incluidos para trazabilidad de despliegue.
 
+**Nota:** Todas las pruebas unitarias pasaron (30/30).
+
 ---
 *Actualización ejecutada por Senior DevOps Engineer*
-*Hash de commit actual: `8d82f21`*
+*Hash de commit actual: `28b94df`*
