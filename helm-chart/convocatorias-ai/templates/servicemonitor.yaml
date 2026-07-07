@@ -1,0 +1,18 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-ai
+  labels:
+    release: {{ .Release.Name }}
+    app: convocatorias-ai
+spec:
+  selector:
+    matchLabels:
+      app: convocatorias-ai
+      release: {{ .Release.Name }}
+  endpoints:
+    - port: http
+      path: {{ .Values.serviceMonitor.path }}
+      interval: {{ .Values.serviceMonitor.interval }}
+{{- end }}

@@ -1,0 +1,73 @@
+# Default values for convocatorias-ai chart
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/automatizacion-convocatorias/convocatorias-ai
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+env:
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_MULTIPROC: "true"
+
+# Prometheus scraping
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  port: 8000
+  path: /metrics
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ai.convocatorias.io
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+# Istio integration
+istio:
+  enabled: true
+  mtls: strict
+
+# Health probes
+probes:
+  liveness:
+    path: /health
+    port: 8000
+  readiness:
+    path: /health
+    port: 8000
+
+# Resource quotas for multi-tenant isolation
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL

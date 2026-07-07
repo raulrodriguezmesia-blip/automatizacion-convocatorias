@@ -1,0 +1,84 @@
+# Convocatorias Platform - Local/Dev Deployment
+# Services: PostgreSQL, AI Service, SaaS API, Marketplace, Spring Boot
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: convocatorias
+      POSTGRES_USER: convocatorias
+      POSTGRES_PASSWORD: convocatorias
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U convocatorias"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  alembic-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.alembic
+    environment:
+      DATABASE_URL: postgresql://convocatorias:convocatorias@postgres:5432/convocatorias
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-service:
+    build:
+      context: ./src/ai
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      LOG_LEVEL: "INFO"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  saas-api:
+    build:
+      context: .
+      dockerfile: src/saas/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql://convocatorias:convocatorias@postgres:5432/convocatorias
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  marketplace-api:
+    build:
+      context: .
+      dockerfile: src/saas/Dockerfile
+    command: ["uvicorn", "marketplace.marketplace_api:app", "--host", "0.0.0.0", "--port", "8002"]
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql://convocatorias:convocatorias@postgres:5432/convocatorias
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  springboot-app:
+    build:
+      context: ./springboot-feature-flag
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      AI_SERVICE_URL: http://ai-service:8000
+      AI_SERVICE_API_KEY: default-key
+    depends_on:
+      - ai-service
+
+volumes:
+  pgdata:

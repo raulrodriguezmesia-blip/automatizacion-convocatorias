@@ -46,6 +46,24 @@ node_modules/
 *.log
 logs/
 
+# Local databases (tests, dev)
+*.db
+*.sqlite
+*.sqlite3
+
+# Build artifacts (Maven/Gradle)
+target/
+*.class
+*.jar
+*.war
+build/
+
+# ML models (generated binaries)
+*.pkl
+*.joblib
+*.h5
+*.onnx
+
 # OS files
 .DS_Store
 Thumbs.db

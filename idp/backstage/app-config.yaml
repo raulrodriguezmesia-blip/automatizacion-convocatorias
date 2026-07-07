@@ -1,0 +1,49 @@
+﻿# App configuration for Backstage IDP
+app:
+  baseUrl: http://localhost:7007
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+  cors:
+    origin: http://localhost:3000
+    methods: [GET,HEAD,PUT,PATCH,POST,DELETE]
+    credentials: true
+
+database:
+  client: sqlite
+  connection: ':memory:'
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: catalog-import
+  locations:
+    - type: url
+      target: https://github.com/automatizacion-convocatorias/springboot-feature-flag/blob/main/catalog/catalog-info.yaml
+      rules:
+        - allow: [Component, System]
+    - type: url
+      target: https://github.com/automatizacion-convocatorias/sdks/blob/main/sdks/python/convocatorias/catalog-info.yaml
+      rules:
+        - allow: [Component]
+    - type: directory
+      target: ./catalog
+
+organization:
+  name: Automatización-Convocatorias
+  url: https://convocatorias.io
+
+auth:
+  environment: development
+  providers:
+    github:
+      development:
+        clientId: 
+        clientSecret: 
+
+proxy:
+  /api/proxy/:
+    target: http://localhost:7007
+    changeOrigin: true

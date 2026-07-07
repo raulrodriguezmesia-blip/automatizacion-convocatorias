@@ -1,0 +1,16 @@
+# SaaS Multi-Tenant Requirements
+fastapi==0.110.0
+uvicorn[standard]==0.27.0
+sqlalchemy==2.0.30
+alembic==1.13.1
+asyncpg==0.29.0
+redis==5.0.1
+pydantic==2.6.3
+pydantic-settings==2.3.3
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+stripe==8.0.0
+prometheus-client==0.20.0
+celery==5.3.6
+flower==2.0.1
+jsonschema==4.22.0

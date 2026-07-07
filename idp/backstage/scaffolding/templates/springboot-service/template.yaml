@@ -1,0 +1,60 @@
+﻿apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: springboot-microservice-template
+  title: Nuevo Microservicio Spring Boot
+  description: Crea un nuevo microservicio Spring Boot con configuración estándar de resiliencia
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Información del Servicio
+      properties:
+        name:
+          title: Nombre del Servicio
+          type: string
+          description: Nombre único del servicio (ej: payment-service)
+        description:
+          title: Descripción
+          type: string
+        owner:
+          title: Equipo Dueño
+          type: string
+          default: platform-team
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: $\
+
+    - id: publish
+      name: Publicar Repositorio
+      action: publish:github
+      input:
+        repoUrl: github.com/mi-organization/$\{ parameters.name }
+        description: $\{ parameters.description }
+        private: false
+
+    - id: register
+      name: Registrar en Catálogo
+      action: register:catalog
+      input:
+        repoContentsPath: $\
+        catalogInfoPath: /catalog-info.yaml
+
+    - id: callback
+      name: Callback de Éxito
+      action: debug
+      input:
+        message: 'Servicio $\{ parameters.name } creado exitosamente!'
+
+  output:
+    links:
+      - title: Repositorio
+        url: $\{ steps.publish.output.repoUrl }
+      - title: Catálogo
+        url: $\{ steps.register.output.entityUrl }

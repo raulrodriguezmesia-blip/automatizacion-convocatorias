@@ -1,0 +1,4 @@
+apiVersion: v2
+name: convocatorias-ai
+version: 0.1.0
+description: Helm chart for Convocatorias AI Service (chatbot + document processing + metrics)

@@ -1,0 +1,24 @@
+﻿apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: springboot-feature-flag
+  description: Sistema de resiliencia corporativa con feature flags
+  labels:
+    team: platform
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-team
+  system: corporate-resilience
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: feature-flag-api
+  description: API para gestión de feature flags en entornos corporativos
+spec:
+  type: openapi
+  lifecycle: production
+  owner: platform-team
+  definition:
+    $text: https://raw.githubusercontent.com/raulrodriguezmesia-blip/springboot-feature-flag/main/openapi.yaml
