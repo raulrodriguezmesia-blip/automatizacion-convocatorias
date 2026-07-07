@@ -79,4 +79,54 @@ garantizada por Resilience4j CircuitBreaker en el cliente AI.
 y `helm-chart/`), instalación de deps pesadas de IA, y RabbitMQ para colas.
 
 ---
-*Generado automáticamente tras la sesión de despliegue y pruebas.*
+
+## Git Update — Safe Push 07/07/2026
+
+### Resumen de cambios
+
+| Commit | Mensaje | Archivos |
+|--------|---------|----------|
+| `eca126a` | chore: sincronización de módulos y documentación (Fase 1/3/6) | `pom.xml`, `requirements-otel.txt` |
+| `6ceb9b3` | feat: SDK Java y .NET con CI/CD pipeline (Fase 2/3/6) | SDK Java (.java), SDK .NET (.cs), workflow CI/CD |
+| `5e56703` | chore: update submodule automatizacion-convocatorias to latest | Submodule reference |
+
+### Archivos creados
+
+- **SDK Java** (`src/main/java/io/automatizacionconvocatorias/sdk/`):
+  - `TenantConfig.java` - Configuración del cliente
+  - `Convocatoria.java` - Modelo de convocatoria
+  - `Template.java` - Modelo de plantilla
+  - `Integration.java` - Modelo de integración
+  - `BusinessMetrics.java` - Métricas de negocio
+  - `ConvocatoriaClient.java` - Cliente HTTP API
+  - `ConvocatoriaClientTest.java` - Tests unitarios
+
+- **SDK .NET** (`src/Convocatorias.Sdk/`):
+  - `TenantConfig.cs` - Configuración del cliente
+  - `Convocatoria.cs` - Modelo de convocatoria
+
+- **CI/CD**:
+  - `.github/workflows/publish-java-sdk.yml` - Workflow para publicación a Maven Central
+
+### Exclusiones mantenidas
+
+```
+*.db           # Bases de datos locales
+target/        # Artifacts Maven
+*.class        # Bytecode Java
+*.pkl          # Modelos ML
+__pycache__/  # Python bytecode
+.env           # Variables de entorno
+node_modules/  # Dependencias Node.js
+.pytest_cache/ # Cache de pruebas
+```
+
+### Próximos pasos
+
+- [ ] Incluir `docker-compose.yml` y `Dockerfile` en el repositorio (actualmente en .gitignore)
+- [ ] Commit y push de cambios pendientes en submodule `automatizacion-convocatorias`
+- [ ] Verificar despliegue de SDK en GitHub Packages / Maven Central
+
+---
+*Actualización ejecutada por Senior DevOps Engineer*
+*Hash de commit actual: `5e56703`*
