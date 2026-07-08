@@ -104,7 +104,7 @@ jobs:
             dir=$(dirname "$file")
             name=$(basename "$dir")
             echo "Building: $file in $dir"
-            docker build -t "$name:test" "$dir" || echo "::warning::Build may have warnings for $dir"
+            docker build -t "$name:test" -f "$file" "$dir" || echo "::warning::Build may have warnings for $dir"
           done
 
       - name: Validate docker-compose up/down
