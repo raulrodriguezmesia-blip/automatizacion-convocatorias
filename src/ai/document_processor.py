@@ -2,18 +2,20 @@
 Document Processor for Convocatoria AI Engine
 Extracts structured data from convocatoria documents (PDF, DOCX, plain text).
 """
-import re
-import os
-from typing import Dict, Any, Optional
+
 import logging
+import os
+import re
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # Lazy imports to avoid hard dependency at import time
 try:
-    import pdfminer.high_level
     import docx
+    import pdfminer.high_level
     import spacy
+
     _NLP_AVAILABLE = True
 except ImportError:
     _NLP_AVAILABLE = False
@@ -27,6 +29,7 @@ def _load_nlp():
         return spacy.load("en_core_web_sm")
     except OSError:
         from spacy.cli import download
+
         download("en_core_web_sm")
         return spacy.load("en_core_web_sm")
 
@@ -62,18 +65,18 @@ def extract_text_from_file(file_path: str) -> str:
     elif ext in [".doc", ".docx"]:
         return extract_text_from_docx(file_path)
     elif ext == ".txt":
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return f.read()
     logger.warning(f"Unsupported file type: {ext}")
     return ""
 
 
-def extract_entities(text: str) -> Dict[str, Any]:
+def extract_entities(text: str) -> dict[str, Any]:
     global _nlp
     if _nlp is None:
         _nlp = _load_nlp()
 
-    entities: Dict[str, Any] = {
+    entities: dict[str, Any] = {
         "title": None,
         "date": None,
         "time": None,
@@ -119,18 +122,23 @@ def extract_entities(text: str) -> Dict[str, Any]:
 
     lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
     for line in lines[:10]:
-        if len(line) < 120 and not re.search(date_patterns[0], line, re.I) and not re.search(time_pattern, line, re.I):
+        if (
+            len(line) < 120
+            and not re.search(date_patterns[0], line, re.I)
+            and not re.search(time_pattern, line, re.I)
+        ):
             entities["title"] = line
             break
 
     desc_keywords = ["objective", "purpose", "description", "about", "aim"]
     for i, line in enumerate(lines):
         if any(kw in line.lower() for kw in desc_keywords):
-            entities["description"] = " ".join(lines[i:i + 3]).strip()
+            entities["description"] = " ".join(lines[i : i + 3]).strip()
             break
 
     req_lines = [
-        line.strip() for line in lines
+        line.strip()
+        for line in lines
         if re.search(r"\bmust\b|\bshould\b|\brequire\b|\bobligatorio\b", line, re.I)
     ]
     if req_lines:
@@ -139,7 +147,7 @@ def extract_entities(text: str) -> Dict[str, Any]:
     return entities
 
 
-def process_document(file_path: str) -> Dict[str, Any]:
+def process_document(file_path: str) -> dict[str, Any]:
     """Main entry point: extract text and entities."""
     text = extract_text_from_file(file_path)
     if not text:
@@ -153,9 +161,11 @@ def process_document(file_path: str) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print("Usage: python document_processor.py <path_to_document>")
         sys.exit(1)
     result = process_document(sys.argv[1])
     import json
+
     print(json.dumps(result, indent=2, ensure_ascii=False))

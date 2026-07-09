@@ -1,10 +1,11 @@
 """Tests for SaaS declarative config engine."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from saas.config_declarative import DeclarativeConfigEngine, config_engine
-import pytest
+from saas.config_declarative import DeclarativeConfigEngine
 
 
 def test_valid_config_passes():
@@ -14,7 +15,7 @@ def test_valid_config_passes():
         "workflows": [
             {"id": "w1", "trigger": "convocatoria_created", "actions": [{"type": "notify"}]}
         ],
-        "features": {"ai_draft": True}
+        "features": {"ai_draft": True},
     }
     errors = engine.validate(config)
     assert errors == []
@@ -39,7 +40,7 @@ def test_merge_with_defaults():
     user_config = {"branding": {"company_name": "Mi U"}}
     merged = engine.merge_with_defaults(user_config)
     assert merged["branding"]["primary_color"] == "#0066cc"  # default preserved
-    assert merged["branding"]["company_name"] == "Mi U"      # override applied
+    assert merged["branding"]["company_name"] == "Mi U"  # override applied
     assert "workflows" in merged
 
 
@@ -53,10 +54,7 @@ def test_render_ui_config():
 
 def test_evaluate_workflow_match():
     engine = DeclarativeConfigEngine()
-    workflow = {
-        "trigger": "convocatoria_created",
-        "actions": [{"type": "a1"}, {"type": "a2"}]
-    }
+    workflow = {"trigger": "convocatoria_created", "actions": [{"type": "a1"}, {"type": "a2"}]}
     actions = engine.evaluate_workflow(workflow, {"type": "convocatoria_created"})
     assert len(actions) == 2
 

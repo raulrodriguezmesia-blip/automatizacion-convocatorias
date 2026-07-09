@@ -1,13 +1,14 @@
 """
 Marketplace Catalog - Templates and Integrations
 """
-import logging
-from typing import Dict, Any, List, Optional
-from datetime import datetime
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 
-from saas.models import Template, Integration, TenantIntegration
+import logging
+from typing import Any
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from saas.models import Integration, Template, TenantIntegration
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,10 @@ class MarketplaceCatalog:
         self,
         name: str,
         category: str,
-        content: Dict[str, Any],
+        content: dict[str, Any],
         description: str = "",
         author_tenant_id: str = None,
-        version: str = "1.0.0"
+        version: str = "1.0.0",
     ) -> Template:
         """Publish a new template to marketplace."""
         with self._session() as session:
@@ -37,17 +38,15 @@ class MarketplaceCatalog:
                 content=content,
                 author_tenant_id=author_tenant_id,
                 version=version,
-                is_published=True
+                is_published=True,
             )
             session.add(template)
             session.flush()
             return template
 
     def list_templates(
-        self,
-        category: Optional[str] = None,
-        published_only: bool = True
-    ) -> List[Dict[str, Any]]:
+        self, category: str | None = None, published_only: bool = True
+    ) -> list[dict[str, Any]]:
         with self._session() as session:
             query = session.query(Template)
             if published_only:
@@ -56,11 +55,11 @@ class MarketplaceCatalog:
                 query = query.filter_by(category=category)
             return [t.to_dict() for t in query.all()]
 
-    def get_template(self, template_id: str) -> Optional[Template]:
+    def get_template(self, template_id: str) -> Template | None:
         with self._session() as session:
             return session.query(Template).filter_by(id=template_id).first()
 
-    def download_template(self, template_id: str, tenant_id: str) -> Dict[str, Any]:
+    def download_template(self, template_id: str, tenant_id: str) -> dict[str, Any]:
         """Download template for a tenant (increments counter)."""
         with self._session() as session:
             template = session.query(Template).filter_by(id=template_id).first()
@@ -73,7 +72,7 @@ class MarketplaceCatalog:
                 "id": template.id,
                 "name": template.name,
                 "content": template.content,
-                "version": template.version
+                "version": template.version,
             }
 
     def rate_template(self, template_id: str, rating: float):
@@ -91,9 +90,9 @@ class MarketplaceCatalog:
         self,
         name: str,
         provider: str,
-        config_schema: Dict[str, Any],
+        config_schema: dict[str, Any],
         description: str = "",
-        auth_type: str = "oauth2"
+        auth_type: str = "oauth2",
     ) -> Integration:
         """Publish a new integration to marketplace."""
         with self._session() as session:
@@ -103,13 +102,13 @@ class MarketplaceCatalog:
                 description=description,
                 config_schema=config_schema,
                 auth_type=auth_type,
-                is_published=True
+                is_published=True,
             )
             session.add(integration)
             session.flush()
             return integration
 
-    def list_integrations(self, provider: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_integrations(self, provider: str | None = None) -> list[dict[str, Any]]:
         with self._session() as session:
             query = session.query(Integration).filter_by(is_published=True)
             if provider:
@@ -117,10 +116,7 @@ class MarketplaceCatalog:
             return [i.to_dict() for i in query.all()]
 
     def install_integration(
-        self,
-        tenant_id: str,
-        integration_id: str,
-        config: Dict[str, Any]
+        self, tenant_id: str, integration_id: str, config: dict[str, Any]
     ) -> TenantIntegration:
         """Install integration for a tenant (config isolation)."""
         with self._session() as session:
@@ -128,20 +124,20 @@ class MarketplaceCatalog:
             integration = session.query(Integration).filter_by(id=integration_id).first()
             if not integration:
                 raise ValueError("Integration not found")
-            
-            existing = session.query(TenantIntegration).filter_by(
-                tenant_id=tenant_id, integration_id=integration_id
-            ).first()
+
+            existing = (
+                session.query(TenantIntegration)
+                .filter_by(tenant_id=tenant_id, integration_id=integration_id)
+                .first()
+            )
             if existing:
                 existing.config = config
                 existing.is_active = True
                 session.merge(existing)
                 return existing
-            
+
             tenant_int = TenantIntegration(
-                tenant_id=tenant_id,
-                integration_id=integration_id,
-                config=config
+                tenant_id=tenant_id, integration_id=integration_id, config=config
             )
             session.add(tenant_int)
             integration.installs += 1
@@ -149,14 +145,14 @@ class MarketplaceCatalog:
             session.flush()
             return tenant_int
 
-    def list_installed(self, tenant_id: str) -> List[Dict[str, Any]]:
+    def list_installed(self, tenant_id: str) -> list[dict[str, Any]]:
         with self._session() as session:
             results = session.query(TenantIntegration).filter_by(tenant_id=tenant_id).all()
             return [
                 {
                     "integration_id": r.integration_id,
                     "is_active": r.is_active,
-                    "installed_at": r.installed_at.isoformat() if r.installed_at else None
+                    "installed_at": r.installed_at.isoformat() if r.installed_at else None,
                 }
                 for r in results
             ]
@@ -165,12 +161,15 @@ class MarketplaceCatalog:
         class SessionCtx:
             def __init__(self, session):
                 self.session = session
+
             def __enter__(self):
                 return self.session
+
             def __exit__(self, exc_type, exc_val, exc_tb):
                 if exc_type is None:
                     self.session.commit()
                 else:
                     self.session.rollback()
                 self.session.close()
+
         return SessionCtx(self.Session())

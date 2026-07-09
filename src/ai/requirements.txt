@@ -2,8 +2,18 @@
 fastapi==0.110.0
 uvicorn[standard]==0.27.0
 pydantic==2.6.3
+pydantic-settings==2.0.3
 python-multipart==0.0.9
 prometheus-client==0.20.0
+requests==2.31.0
+# Logging
+python-json-logger==2.0.7
+# OpenTelemetry
+opentelemetry-api==1.26.0
+opentelemetry-sdk==1.26.0
+opentelemetry-exporter-otlp==1.26.0
+opentelemetry-instrumentation-fastapi==0.46b0
+opentelemetry-instrumentation-requests==0.46b0
 # NLP and document processing
 spacy==3.7.2
 pdfminer.six==20221105
@@ -16,5 +26,11 @@ sentence-transformers==2.6.1
 scikit-learn==1.5.0
 pandas==2.2.2
 numpy==1.26.4
+# Optional: Redis for caching/rate limiting
+redis==5.0.3
+# Testing
+pytest==8.1.0
+pytest-asyncio==0.23.5
+pytest-cov==4.1.0
 # Optional: GPU support if available
 # torch==2.3.0+cu121

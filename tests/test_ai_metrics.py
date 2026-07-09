@@ -1,10 +1,12 @@
 """Tests for AI metrics module (drift detection, accuracy)."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+
 from ai import metrics
-import pytest
 
 
 def test_record_prediction_runs():

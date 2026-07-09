@@ -1,4 +1,4 @@
-﻿package io.automatizacionconvocatorias.sdk;
+package io.automatizacionconvocatorias.sdk;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,11 +1,13 @@
 """Tests for Tenant Manager isolation and lifecycle."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from saas.tenant_manager import TenantManager
-from saas.models import Tenant
 import pytest
+
+from saas.tenant_manager import TenantManager
 
 
 @pytest.fixture
@@ -17,10 +19,7 @@ def mgr(db_url):
 
 def test_create_tenant(mgr, sample_tenant_config):
     tenant = mgr.create_tenant(
-        name="Test Uni",
-        subdomain="test-uni",
-        plan="pro",
-        config=sample_tenant_config
+        name="Test Uni", subdomain="test-uni", plan="pro", config=sample_tenant_config
     )
     assert tenant.id.startswith("tnt_")
     assert tenant.subdomain == "test-uni"

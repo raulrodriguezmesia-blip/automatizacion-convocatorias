@@ -1,0 +1,171 @@
+# Grafana Dashboards for Convocatoria AI Engine
+
+## Convocatoria Overview Dashboard
+
+```json
+{
+  "dashboard": {
+    "title": "Convocatoria AI Engine - Overview",
+    "tags": ["convocatorias", "business"],
+    "panels": [
+      {
+        "title": "Convocatorias Created (24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(convocatoria_created_total[24h]))",
+            "legendFormat": "Total"
+          }
+        ]
+      },
+      {
+        "title": "Calendar API Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(calendar_api_duration_seconds_bucket[5m])) by (provider)",
+            "legendFormat": "{{provider}} p95"
+          }
+        ]
+      },
+      {
+        "title": "Notification Success Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(notification_success_total[5m])) / sum(rate(notification_total[5m]))",
+            "legendFormat": "Success rate"
+          }
+        ]
+      },
+      {
+        "title": "Circuit Breaker States",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "circuit_breaker_state{success=\"open\"}",
+            "legendFormat": "Open circuits"
+          }
+        ]
+      },
+      {
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))",
+            "legendFormat": "5xx rate"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## System Health Dashboard
+
+```json
+{
+  "dashboard": {
+    "title": "Convocatoria AI Engine - System Health",
+    "tags": ["convocatorias", "system"],
+    "panels": [
+      {
+        "title": "Pod Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "kube_pod_status_ready{namespace=\"convocatorias\"}",
+            "legendFormat": "{{pod}}"
+          }
+        ]
+      },
+      {
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{namespace=\"convocatorias\"}[5m])",
+            "legendFormat": "{{container}}"
+          }
+        ]
+      },
+      {
+        "title": "Memory Usage",
+        "type": "graph", 
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{namespace=\"convocatorias\"} / container_memory_limit_bytes{namespace=\"convocatorias\"}",
+            "legendFormat": "{{container}}"
+          }
+        ]
+      },
+      {
+        "title": "HTTP Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m])) by (method, status)",
+            "legendFormat": "{{method}} {{status}}"
+          }
+        ]
+      },
+      {
+        "title": "Rate Limit Blocks",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(rate_limit_blocked_total[5m]))",
+            "legendFormat": "Blocked requests"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Alert Rules
+
+```yaml
+# infra/monitoring/alerts.yaml
+groups:
+  - name: convocatorias.ai
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% for convocatorias service"
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Circuit breaker is OPEN"
+          description: "Circuit {{ $labels.circuit }} is open, external service unavailable"
+
+      - alert: LowCacheHitRate
+        expr: cache_hit_ratio < 0.7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cache hit rate low"
+          description: "Cache hit ratio is {{ $value }}, consider warming cache"
+
+      - alert: PodNotReady
+        expr: kube_pod_status_ready{condition="true"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod not ready"
+          description: "Pod {{ $labels.pod }} is not ready"
+```

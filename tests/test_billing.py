@@ -1,12 +1,16 @@
 """Tests for billing usage tracker and invoicing."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from billing.usage_tracker import UsageTracker, PRICING
-from billing.invoicing import InvoicingService
-import pytest
 from datetime import datetime
+
+import pytest
+
+from billing.invoicing import InvoicingService
+from billing.usage_tracker import PRICING, UsageTracker
 
 
 @pytest.fixture

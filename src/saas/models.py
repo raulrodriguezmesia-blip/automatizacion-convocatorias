@@ -2,15 +2,26 @@
 SQLAlchemy models for Multi-Tenant SaaS Architecture
 Complete data/configuration isolation per tenant.
 """
+
+import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 from sqlalchemy import (
-    Column, String, Integer, DateTime, JSON, Boolean, Float, 
-    ForeignKey, UniqueConstraint, Index, create_engine
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    create_engine,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-import uuid
+from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
 
@@ -21,6 +32,7 @@ def generate_id(prefix: str = "tnt") -> str:
 
 class Tenant(Base):
     """Tenant isolation root entity."""
+
     __tablename__ = "tenants"
     __table_args__ = (
         UniqueConstraint("subdomain", name="uq_tenant_subdomain"),
@@ -41,7 +53,7 @@ class Tenant(Base):
     users = relationship("TenantUser", back_populates="tenant", cascade="all, delete-orphan")
     usage = relationship("UsageRecord", back_populates="tenant", cascade="all, delete-orphan")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,
@@ -55,10 +67,9 @@ class Tenant(Base):
 
 class TenantUser(Base):
     """User within a tenant (RBAC)."""
+
     __tablename__ = "tenant_users"
-    __table_args__ = (
-        UniqueConstraint("tenant_id", "email", name="uq_tenant_user_email"),
-    )
+    __table_args__ = (UniqueConstraint("tenant_id", "email", name="uq_tenant_user_email"),)
 
     id = Column(String, primary_key=True, default=lambda: generate_id("usr"))
     tenant_id = Column(String, ForeignKey("tenants.id"), nullable=False)
@@ -72,6 +83,7 @@ class TenantUser(Base):
 
 class UsageRecord(Base):
     """Usage tracking for billing (metered)."""
+
     __tablename__ = "usage_records"
     __table_args__ = (
         Index("idx_usage_tenant_month", "tenant_id", "period_month"),
@@ -81,7 +93,9 @@ class UsageRecord(Base):
     id = Column(String, primary_key=True, default=lambda: generate_id("use"))
     tenant_id = Column(String, ForeignKey("tenants.id"), nullable=False)
     period_month = Column(String(7), nullable=False)  # YYYY-MM
-    metric_type = Column(String(30), nullable=False)  # convocatorias|api_calls|storage_gb|integrations
+    metric_type = Column(
+        String(30), nullable=False
+    )  # convocatorias|api_calls|storage_gb|integrations
     quantity = Column(Integer, default=0)
     unit_cost = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -95,6 +109,7 @@ class UsageRecord(Base):
 
 class Template(Base):
     """Marketplace template catalog."""
+
     __tablename__ = "templates"
     __table_args__ = (
         Index("idx_template_category", "category"),
@@ -113,7 +128,7 @@ class Template(Base):
     rating_avg = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,
@@ -127,6 +142,7 @@ class Template(Base):
 
 class Integration(Base):
     """Marketplace integration catalog."""
+
     __tablename__ = "integrations"
 
     id = Column(String, primary_key=True, default=lambda: generate_id("int"))
@@ -138,7 +154,7 @@ class Integration(Base):
     is_published = Column(Boolean, default=False)
     installs = Column(Integer, default=0)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,
@@ -151,6 +167,7 @@ class Integration(Base):
 
 class TenantIntegration(Base):
     """Installed integration per tenant (config isolation)."""
+
     __tablename__ = "tenant_integrations"
     __table_args__ = (
         UniqueConstraint("tenant_id", "integration_id", name="uq_tenant_integration"),

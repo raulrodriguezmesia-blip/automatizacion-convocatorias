@@ -1,0 +1,99 @@
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "N",
+    "YTT",
+    "ASYNC",
+    "BLE",
+    "B",
+    "C",
+    "D",
+    "EM",
+    "ERA",
+    "FA",
+    "IC",
+    "PT",
+    "RET",
+    "RSE",
+    "SLF",
+    "SIM",
+    "TCH",
+    "TID",
+    "TRY",
+    "W",
+]
+
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "D203",
+    "D212",
+    "D401",
+    "D403",
+    "D404",
+    "D405",
+    "D406",
+    "D407",
+    "D412",
+    "D413",
+    "D414",
+    "D415",
+    "D416",
+    "D417",
+    # Framework idioms / non-critical style
+    "B008",   # FastAPI requires File(...)/Form(...)/Depends(...) in defaults
+    "N818",   # CircuitBreakerOpen naming is intentional domain terminology
+    "E501",   # Long lines tolerated (line-length raised to 100)
+    # --- Accepted technical debt (progressive ratchet) ---
+    # TODO: re-enable incrementally as the team cleans legacy code
+    "BLE001", # blind-except
+    "D200",   # unnecessary-multiline-docstring
+    "D205",   # missing-blank-line-after-summary
+    "EM101",  # raw-string-in-exception
+    "EM102",  # f-string-in-exception
+    "PT011",  # pytest-raises-too-broad
+    "PT022",  # pytest-useless-yield-fixture
+    "RET504", # unnecessary-assign
+    "RET505", # superfluous-else-return
+    "SIM102", # collapsible-if
+    "SIM116", # if-else-block-instead-of-dict-lookup
+    "SLF001", # private-member-access
+    "TRY300", # try-consider-else
+    "TRY003", # raise-vanilla-args
+    "TRY400", # error-instead-of-exception
+    "B904",   # raise-without-from-inside-except
+    "C901",   # complex-structure
+    "F841",   # unused-variable (remaining; real ones already fixed)
+]
+
+fixable = [
+    "F401",
+    "F821",
+    "F541",
+    "I",
+    "UP",
+    "W",
+]
+
+unfixable = []
+
+[lint.isort]
+known-first-party = ["src", "tests", "alembic"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]

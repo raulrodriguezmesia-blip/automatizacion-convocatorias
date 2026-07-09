@@ -3,9 +3,11 @@ Convocation Generator
 Creates a draft convocatoria document from structured entity data.
 Can use a template or an LLM for enhancement.
 """
+
 import json
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
 from jinja2 import Template
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,7 @@ def _get_llm_pipeline():
     if _llm_pipeline is None:
         try:
             from transformers import pipeline
+
             _llm_pipeline = pipeline(
                 "text2text-generation",
                 model="google/flan-t5-base",
@@ -53,7 +56,7 @@ Requisitos:
 """
 
 
-def render_template(data: Dict[str, Any]) -> str:
+def render_template(data: dict[str, Any]) -> str:
     """Render convocatoria using Jinja2 template."""
     template = Template(CONVOCATORIA_TEMPLATE, trim_blocks=True, lstrip_blocks=True)
     data.setdefault("attendees", [])
@@ -67,7 +70,7 @@ def render_template(data: Dict[str, Any]) -> str:
     return template.render(**data)
 
 
-def enhance_with_llm(draft: str, entities: Dict[str, Any]) -> str:
+def enhance_with_llm(draft: str, entities: dict[str, Any]) -> str:
     """Optionally improve the draft using an LLM."""
     llm = _get_llm_pipeline()
     if llm is None:
@@ -88,7 +91,7 @@ def enhance_with_llm(draft: str, entities: Dict[str, Any]) -> str:
         return draft
 
 
-def generate_convocatoria(entities: Dict[str, Any], use_llm: bool = False) -> str:
+def generate_convocatoria(entities: dict[str, Any], use_llm: bool = False) -> str:
     """Generate a convocatoria draft."""
     draft = render_template(entities)
     if use_llm:
@@ -99,6 +102,7 @@ def generate_convocatoria(entities: Dict[str, Any], use_llm: bool = False) -> st
 def generate_from_document(file_path: str, use_llm: bool = False) -> dict:
     """Convenience: process document and generate convocatoria."""
     from .document_processor import process_document
+
     proc = process_document(file_path)
     if "error" in proc:
         return proc
@@ -113,6 +117,7 @@ def generate_from_document(file_path: str, use_llm: bool = False) -> dict:
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print("Usage: python generator.py <path_to_document> [--llm]")
         sys.exit(1)

@@ -1,4 +1,4 @@
-﻿package io.automatizacionconvocatorias.sdk;
+package io.automatizacionconvocatorias.sdk;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -100,8 +101,8 @@ public class ConvocatoriaClient implements AutoCloseable {
     private <T> T executeRequest(String method, String path, HttpEntity entity, Class<T> responseType) throws IOException {
         String url = baseUrl + path;
         
-        // Create appropriate HTTP request based on method
-        org.apache.http.client.methods.CloseableHttpRequest httpRequest;
+// Create appropriate HTTP request based on method
+         org.apache.http.client.methods.HttpUriRequest httpRequest;
         switch (method.toUpperCase()) {
             case "GET":
                 httpRequest = new HttpGet(url);
@@ -219,59 +220,11 @@ public class ConvocatoriaClient implements AutoCloseable {
         return convocatoriasArray != null ? Arrays.asList(convocatoriasArray) : new ArrayList<>();
     }
 
-/**
+    /**
      * Overloaded method with default limit of 50.
      */
     public List<Convocatoria> listConvocatorias() throws IOException {
         return listConvocatorias(50);
-    }
-
-    /**
-     * Lists convocatorias with pagination support.
-     *
-     * @param limit  Maximum number of convocatorias to return
-     * @param offset Offset for pagination (number of records to skip)
-     * @return List of convocatorias
-     * @throws IOException If there is an error with the API request
-     */
-    public List<Convocatoria> listConvocatorias(int limit, int offset) throws IOException {
-        String path = "/convocatorias?limit=" + limit + "&offset=" + offset;
-        Convocatoria[] convocatoriasArray = executeRequest("GET", path, null, Convocatoria[].class);
-        return convocatoriasArray != null ? Arrays.asList(convocatoriasArray) : new ArrayList<>();
-    }
-
-    /**
-     * Lists convocatorias filtered by status.
-     *
-     * @param status Status to filter by (e.g., "active", "completed", "cancelled")
-     * @return List of convocatorias matching the status
-     * @throws IOException If there is an error with the API request
-     */
-    public List<Convocatoria> listConvocatoriasByStatus(String status) throws IOException {
-        String path = "/convocatorias?status=" + java.net.URLEncoder.encode(status, StandardCharsets.UTF_8);
-        Convocatoria[] convocatoriasArray = executeRequest("GET", path, null, Convocatoria[].class);
-        return convocatoriasArray != null ? Arrays.asList(convocatoriasArray) : new ArrayList<>();
-    }
-
-    /**
-     * Searches convocatorias by query string.
-     *
-     * @param query Search query string
-     * @param limit Maximum number of results (default 50)
-     * @return List of matching convocatorias
-     * @throws IOException If there is an error with the API request
-     */
-    public List<Convocatoria> searchConvocatorias(String query, int limit) throws IOException {
-        String path = "/convocatorias/search?q=" + java.net.URLEncoder.encode(query, StandardCharsets.UTF_8) + "&limit=" + limit;
-        Convocatoria[] convocatoriasArray = executeRequest("GET", path, null, Convocatoria[].class);
-        return convocatoriasArray != null ? Arrays.asList(convocatoriasArray) : new ArrayList<>();
-    }
-
-    /**
-     * Overloaded search method with default limit.
-     */
-    public List<Convocatoria> searchConvocatorias(String query) throws IOException {
-        return searchConvocatorias(query, 50);
     }
 
     /**

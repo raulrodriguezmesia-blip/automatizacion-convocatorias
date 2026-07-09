@@ -1,13 +1,15 @@
 """Shared pytest fixtures for Convocatorias tests."""
+
 import os
 import sys
+
 import pytest
 from sqlalchemy import create_engine
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from saas.models import Base, init_db
+from saas.models import Base
 
 
 @pytest.fixture(scope="session")
@@ -29,19 +31,13 @@ def setup_database(db_url):
 @pytest.fixture
 def sample_tenant_config():
     return {
-        "branding": {
-            "primary_color": "#0066cc",
-            "company_name": "Test University"
-        },
+        "branding": {"primary_color": "#0066cc", "company_name": "Test University"},
         "workflows": [
             {
                 "id": "default",
                 "trigger": "convocatoria_created",
-                "actions": [{"type": "create_calendar_event", "config": {}}]
+                "actions": [{"type": "create_calendar_event", "config": {}}],
             }
         ],
-        "features": {
-            "ai_draft": True,
-            "chatbot": True
-        }
+        "features": {"ai_draft": True, "chatbot": True},
     }

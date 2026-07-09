@@ -1,10 +1,13 @@
 """Tests for Marketplace catalog."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from marketplace.catalog import MarketplaceCatalog
 import pytest
+
+from marketplace.catalog import MarketplaceCatalog
 
 
 @pytest.fixture
@@ -17,7 +20,7 @@ def test_publish_and_list_template(catalog):
         name="Reunión Comité",
         category="committee",
         content={"title": "{{title}}", "fields": []},
-        description="Plantilla para comités"
+        description="Plantilla para comités",
     )
     assert tpl.id.startswith("tpl_")
     templates = catalog.list_templates(category="committee")
@@ -26,9 +29,7 @@ def test_publish_and_list_template(catalog):
 
 
 def test_download_template_increments(catalog):
-    tpl = catalog.publish_template(
-        name="Evento", category="event", content={"x": 1}
-    )
+    tpl = catalog.publish_template(name="Evento", category="event", content={"x": 1})
     initial = catalog.get_template(tpl.id).downloads
     catalog.download_template(tpl.id, "tenant_x")
     assert catalog.get_template(tpl.id).downloads == initial + 1
@@ -42,10 +43,7 @@ def test_rate_template(catalog):
 
 def test_publish_and_install_integration(catalog):
     integration = catalog.publish_integration(
-        name="Slack",
-        provider="slack",
-        config_schema={"type": "object"},
-        auth_type="webhook"
+        name="Slack", provider="slack", config_schema={"type": "object"}, auth_type="webhook"
     )
     result = catalog.install_integration(
         "tenant_y", integration.id, {"webhook_url": "https://hooks.slack.com/x"}
@@ -56,9 +54,7 @@ def test_publish_and_install_integration(catalog):
 
 
 def test_install_integration_idempotent(catalog):
-    integration = catalog.publish_integration(
-        name="Teams", provider="teams", config_schema={}
-    )
+    integration = catalog.publish_integration(name="Teams", provider="teams", config_schema={})
     catalog.install_integration("t", integration.id, {"url": "a"})
     catalog.install_integration("t", integration.id, {"url": "b"})  # re-install
     installed = catalog.list_installed("t")

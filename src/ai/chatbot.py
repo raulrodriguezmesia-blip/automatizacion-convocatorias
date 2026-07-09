@@ -2,16 +2,16 @@
 Chatbot API for Convocatoria Management
 Exposes endpoints for document processing, convocatoria generation, and conversational interface.
 """
-import os
-import json
+
 import logging
-from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+import os
+from typing import Any
+
+import uvicorn
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import uvicorn
 
-from .document_processor import process_document
 from .generator import generate_convocatoria, generate_from_document
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(
     title="Convocatoria AI Chatbot",
     description="Enterprise chatbot for automated convocatoria management",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS for frontend integration
@@ -33,7 +33,7 @@ app.add_middleware(
 )
 
 # In-memory conversation history (replace with Redis in production)
-conversation_store: Dict[str, List[Dict[str, str]]] = {}
+conversation_store: dict[str, list[dict[str, str]]] = {}
 
 
 class ChatMessage(BaseModel):
@@ -50,7 +50,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     session_id: str
-    structured_data: Optional[Dict[str, Any]] = None
+    structured_data: dict[str, Any] | None = None
 
 
 class DocumentProcessRequest(BaseModel):
@@ -61,7 +61,7 @@ class MetricsSummary(BaseModel):
     predictions_total: int
     drift_alerts: int
     model_accuracy: float
-    last_retrain: Optional[str] = None
+    last_retrain: str | None = None
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -78,7 +78,9 @@ async def chat_endpoint(request: ChatRequest):
     response_text = ""
     structured = None
 
-    if any(kw in user_msg.lower() for kw in ["procesa", "documento", "archivo", "upload", "analiza"]):
+    if any(
+        kw in user_msg.lower() for kw in ["procesa", "documento", "archivo", "upload", "analiza"]
+    ):
         response_text = "Por favor sube el documento usando el endpoint /process-document o adjuntalo en el chat."
     elif any(kw in user_msg.lower() for kw in ["genera", "crea", "redacta", "borrador", "draft"]):
         response_text = "Para generar una convocatoria, necesito los detalles: titulo, fecha, hora, lugar, organizador, descripcion, asistentes y requisitos."
@@ -98,20 +100,14 @@ async def chat_endpoint(request: ChatRequest):
 
     conversation_store[session_id].append({"role": "assistant", "content": response_text})
 
-    return ChatResponse(
-        response=response_text,
-        session_id=session_id,
-        structured_data=structured
-    )
+    return ChatResponse(response=response_text, session_id=session_id, structured_data=structured)
 
 
 @app.post("/process-document")
-async def process_document_endpoint(
-    file: UploadFile = File(...),
-    use_llm: bool = Form(False)
-):
+async def process_document_endpoint(file: UploadFile = File(...), use_llm: bool = Form(False)):
     """Upload and process a convocatoria document."""
     import tempfile
+
     suffix = os.path.splitext(file.filename)[1] or ".tmp"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         content = await file.read()
@@ -125,11 +121,8 @@ async def process_document_endpoint(
         os.unlink(tmp_path)
 
 
-@app.post("/generate", response_model=Dict[str, str])
-async def generate_endpoint(
-    entities: Dict[str, Any],
-    use_llm: bool = False
-):
+@app.post("/generate", response_model=dict[str, str])
+async def generate_endpoint(entities: dict[str, Any], use_llm: bool = False):
     """Generate convocatoria from structured entities."""
     convocatoria = generate_convocatoria(entities, use_llm=use_llm)
     return {"convocatoria": convocatoria}
@@ -139,10 +132,7 @@ async def generate_endpoint(
 async def metrics_summary():
     """Return AI model metrics for Prometheus/Grafana dashboards."""
     return MetricsSummary(
-        predictions_total=0,
-        drift_alerts=0,
-        model_accuracy=0.0,
-        last_retrain=None
+        predictions_total=0, drift_alerts=0, model_accuracy=0.0, last_retrain=None
     )
 
 

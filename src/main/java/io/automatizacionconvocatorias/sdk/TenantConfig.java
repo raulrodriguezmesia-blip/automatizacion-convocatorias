@@ -1,4 +1,4 @@
-﻿package io.automatizacionconvocatorias.sdk;
+package io.automatizacionconvocatorias.sdk;
 
 import java.util.Objects;
 

@@ -1,5 +1,5 @@
 # Convocatorias Platform - Local/Dev Deployment
-# Services: PostgreSQL, AI Service, SaaS API, Marketplace, Spring Boot
+# Services: PostgreSQL, AI Service, SaaS API, Marketplace
 version: "3.8"
 
 services:
@@ -67,18 +67,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-
-  springboot-app:
-    build:
-      context: ./springboot-feature-flag
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      AI_SERVICE_URL: http://ai-service:8000
-      AI_SERVICE_API_KEY: default-key
-    depends_on:
-      - ai-service
 
 volumes:
   pgdata:
