@@ -68,5 +68,23 @@ services:
       postgres:
         condition: service_healthy
 
+  # Optional message broker. Disabled by default: the Spring Boot consumer
+  # that previously used RabbitMQ was removed (see commit history). Enable it
+  # only when a service requires async messaging.
+  #
+  # rabbitmq:
+  #   image: rabbitmq:3.13-management-alpine
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: convocatorias
+  #     RABBITMQ_DEFAULT_PASS: convocatorias
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmq-diagnostics", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
 volumes:
   pgdata:
