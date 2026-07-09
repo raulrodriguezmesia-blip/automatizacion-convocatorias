@@ -118,9 +118,9 @@ cp .env.example .env
 # Editar .env con credenciales: DB, OAuth2, APIs externas
 
 # 3. Levantar infraestructura local
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 
-# 4. Compilar y ejecutar
+# 4. Compilar y ejecutar (para desarrollo backend)
 ./mvnw clean spring-boot:run -Dspring-boot.run.profiles=dev
 
 # 5. Verificar
@@ -135,7 +135,7 @@ helm repo add convocatorias https://charts.tu-org.com
 helm repo update
 
 # Desplegar
-helm upgrade --install convocatorias ./chart/convocatorias \
+helm upgrade --install convocatorias ./helm-chart/convocatorias \
   --namespace convocatorias-prod \
   --create-namespace \
   --set image.tag=v1.0.0 \
@@ -259,7 +259,7 @@ Los siguientes archivos están disponibles para el despliegue:
 |---------|-------------|-----|
 | `docker-compose.yml` | Orquestamiento de servicios locales | `docker-compose up -d` |
 | `Dockerfile` (cada servicio) | Build multi-stage para cada microservicio | Imágenes Docker |
-| `helm-chart/` | Charts Helm para despliegue K8s | `helm install convocatorias ./helm-chart/convocatorias-ai` |
+| `helm-chart/` | Charts Helm para despliegue K8s | `helm install convocatorias ./helm-chart/convocatorias` |
 
 ### Despliegue Local
 ```bash

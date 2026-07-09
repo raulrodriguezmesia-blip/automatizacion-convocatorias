@@ -15,9 +15,8 @@ public class Integration {
     // Constructors
     public Integration() {}
 
-    public Integration(String id, String name, String provider, Map<String, Object> configSchema) {
+public Integration(String id, String name, String provider, Map<String, Object> configSchema) {
         this.id = id;
-        this.name = name = name;
         this.name = name;
         this.provider = provider;
         this.configSchema = configSchema;
