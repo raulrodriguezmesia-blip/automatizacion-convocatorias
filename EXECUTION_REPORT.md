@@ -96,6 +96,30 @@ CircuitBreaker aiService: ✅ activo
 | `src/saas/api.py`, `marketplace_api.py` | `init_*` no invocado con uvicorn | `@app.on_event("startup")` |
 | `alembic/env.py` | Indentación + soporte env | Corregido |
 | `SecurityConfig.java` | `/api/ai/**` bloqueado por JWT | → `permitAll` |
+| `Integration.java` | Constructor con asignación duplicada `this.name = name = name;` | ✅ **CORREGIDO** |
+
+## Mejoras Realizadas
+
+### SDK Java
+- ✅ **Integration.java** - Bug en constructor corregido
+- ✅ **ConvocatoriaClient.java** - Añadidos métodos:
+  - `listConvocatorias(int limit, int offset)` - Paginación
+  - `listConvocatoriasByStatus(String status)` - Filtrado por estado
+  - `searchConvocatorias(String query, int limit)` - Búsqueda
+- ✅ **BusinessMetrics.java** - Completamente implementado
+
+### SDK .NET
+- ✅ **Template.cs** - Modelo completo con propiedades adicionales
+- ✅ **Integration.cs** - Modelo completo con ConfigSchema
+- ✅ **BusinessMetrics.cs** - Modelo con todas las propiedades
+- ✅ **ConvocatoriaClient.cs** - Cliente HTTP async con métodos:
+  - `CreateConvocatoriaAsync()`
+  - `ListConvocatoriasAsync()`
+  - `GetConvocatoriaAsync()`
+  - `UpdateConvocatoriaAsync()`
+  - `DeleteConvocatoriaAsync()`
+  - `GetTemplatesAsync()`
+  - `GetTenantMetricsAsync()`
 
 ## Métricas de la Prueba
 
@@ -132,17 +156,22 @@ y `helm-chart/`), instalación de deps pesadas de IA, y RabbitMQ para colas.
   - `TenantConfig.java` - Configuración del cliente
   - `Convocatoria.java` - Modelo de convocatoria
   - `Template.java` - Modelo de plantilla
-  - `Integration.java` - Modelo de integración
-  - `BusinessMetrics.java` - Métricas de negocio
-  - `ConvocatoriaClient.java` - Cliente HTTP API
+  - `Integration.java` - Modelo de integración (bug corregido)
+  - `BusinessMetrics.java` - Métricas de negocio (completado)
+  - `ConvocatoriaClient.java` - Cliente HTTP API (paginación y búsqueda añadidos)
   - `ConvocatoriaClientTest.java` - Tests unitarios
 
 - **SDK .NET** (`src/Convocatorias.Sdk/`):
   - `TenantConfig.cs` - Configuración del cliente
   - `Convocatoria.cs` - Modelo de convocatoria
+  - `Template.cs` - Modelo de plantilla (nuevo)
+  - `Integration.cs` - Modelo de integración (nuevo)
+  - `BusinessMetrics.cs` - Métricas de negocio (nuevo)
+  - `ConvocatoriaClient.cs` - Cliente HTTP async (nuevo)
 
 - **CI/CD**:
   - `.github/workflows/publish-java-sdk.yml` - Workflow para publicación a Maven Central
+  - `.github/workflows/docker-validation.yml` - Validación de Docker
 
 ### Exclusiones mantenidas
 
