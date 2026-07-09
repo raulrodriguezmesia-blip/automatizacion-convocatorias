@@ -269,7 +269,7 @@ docker-compose up -d
 
 ### Despliegue Producción
 ```bash
-helm upgrade --install convocatorias ./helm-chart/convocatorias-ai \
+helm upgrade --install convocatorias ./helm-chart/convocatorias \
   --namespace convocatorias-prod \
   --create-namespace \
   --set image.tag=v1.0.0
