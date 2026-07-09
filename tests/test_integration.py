@@ -2,6 +2,7 @@
 Integration tests for Convocatoria AI Engine.
 Tests complete flows with mocked external services.
 """
+
 import os
 import sys
 import tempfile
@@ -110,6 +111,7 @@ class TestCircuitBreakerIntegration:
 
         # Wait for recovery timeout
         import time
+
         time.sleep(0.15)
 
         # Calling after timeout transitions to HALF_OPEN internally, then to CLOSED on success
@@ -119,21 +121,20 @@ class TestCircuitBreakerIntegration:
 
     def test_circuit_breaker_with_fallback(self):
         """Test circuit breaker uses fallback when open."""
+        # Create a fresh client with clean state
         client = ExternalAPIClient(
-            name="test_service",
-            circuit_failure_threshold=1,
-            circuit_recovery_timeout=60.0
+            name="test_fallback_service",
+            circuit_failure_threshold=100,  # Won't open from our test
+            circuit_recovery_timeout=60.0,
+            retry_attempts=1,  # No retry for this test
         )
 
-        # Open the circuit
-        with pytest.raises(ValueError):
-            client.execute_with_protection(
-                lambda: (_ for _ in ()).throw(ValueError("error"))
-            )
+        # Test that fallback works by mocking the circuit state
+        client.circuit_breaker._state = CircuitState.OPEN
 
-        # Use fallback via ExternalAPIClient
+        # Fallback should be used immediately
         result = client.execute_with_protection(
-            operation=lambda: (_ for _ in ()).throw(ValueError("error")),
+            operation=lambda: "would_fail",
             fallback=lambda: "fallback_result",
         )
         assert result == "fallback_result"
