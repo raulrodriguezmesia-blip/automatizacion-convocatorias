@@ -1,108 +1,137 @@
-# Automatización-Convocatorias
+# Automatización de Convocatorias 🚀
+### Sistema Empresarial Core para Gestión y Procesamiento de Convocatorias
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/tu-usuario/automatizacion-convocatorias/ci.yml?branch=main&label=Build%20Status)
-![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-Automated-orange)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Build Status](https://shields.io)
+![Java Version](https://shields.io)
+![Spring Boot](https://shields.io)
+![Docker Ready](https://shields.io)
+![CI/CD](https://shields.io)
+![Observabilidad](https://shields.io)
 
-Plataforma enterprise para la automatización integral de convocatorias académicas.
+Plataforma corporativa de nivel *enterprise* para la automatización integral, gestión y procesamiento distribuido de convocatorias académicas y administrativas.
 
-## 🚀 Nuevas Características (v1.0.0)
+---
+
+## 🚀 Características Avanzadas (v1.0.0)
 
 ### 🔧 Resilience Engineering
-- **Circuit Breaker** - Protección contra fallos en cascada para APIs externas
-- **Retry con Exponential Backoff** - Reintentos inteligentes con jitter
-- **Fallback Graceful** - Servicio degradado cuando fallan dependencias
+* **Circuit Breaker & Rate Limiting:** Implementación de patrones de tolerancia a fallos mediante mecanismos de Redis con ventana deslizante (*sliding window*) para mitigar caídas en cascada ante APIs de terceros.
+* **Resilient Retry Framework:** Políticas de reintentos inteligentes con retroceso exponencial (*exponential backoff*) y fluctuación (*jitter*) para la integración con servicios de mensajería externos.
+* **Graceful Fallback:** Degradación controlada del servicio que garantiza la disponibilidad de las consultas de convocatorias aun si los sistemas de notificación colapsan.
 
-### 📊 Observabilidad
-- **Logging Estructurado JSON** - Compatible con ELK/Splunk
-- **OpenTelemetry Distribuido** - Trazas end-to-end con correlation ID
-- **Health Checks Separados** - Liveness y Readiness separados
-- **Prometheus Metrics** - Métricas de negocio y sistema
+### 📊 Observabilidad y Producción
+* **Logging Estructurado JSON:** Trazabilidad estandarizada compatible con ecosistemas centralizados de análisis de logs (ELK / Splunk).
+* **Distributed Telemetry:** Propagación de identificadores de correlación (*Correlation IDs*) para auditorías transversales extremo a extremo.
+* **Probes de Orquestación:** Interfaces explícitas diferenciadas para métricas de ciclo de vida en Kubernetes (*Liveness* y *Readiness*).
 
-### ⚙️ Configuration
-- **Pydantic Settings** - Validación por entorno (dev/staging/prod)
-- **Rate Limiting** - Redis backend con sliding window
-- **Feature Flags** - Toggle system preparado
+---
 
 ## 📋 Descripción del Proyecto
+Este sistema es una solución empresarial de alta concurrencia diseñada para **eliminar el procesamiento manual y la gestión ineficiente de convocatorias**. La plataforma centraliza el ciclo de vida completo de una postulación: desde la parametrización de bases, control transaccional de expedientes en entornos relacionales, hasta la integración asíncrona con pasarelas de notificación multi-canal (Slack, Teams, Email) y calendarios corporativos.
 
-Automatización-Convocatorias elimina la gestión manual de convocatorias académicas y administrativas mediante integración con calendarios, generación automática de reportes y notificaciones multi-canal.
+---
 
-## 🚀 Quick Start
+## 🏗️ Arquitectura y Patrones de Diseño
+El backend está construido bajo los principios de **Clean Architecture y Arquitectura Hexagonal**, encapsulando las reglas de negocio puras lejos de la infraestructura tecnológica.
 
-```bash
-# Install
-pip install -r src/ai/requirements.txt
-
-# Configure
-cp .env.example .env
-# Edit .env with your values
-
-# Run
-python src/main.py --title "Reunión" --datetime "2026-08-15T10:00:00" --attendees "test@example.com"
+```mermaid
+graph TD
+    A[React SPA Frontend] -->|REST APIs + JWT| B[Spring Boot Core API]
+    B -->|Persistencia ACID| C[PostgreSQL]
+    B -->|Distributed Cache & Rate Limit| D[Redis Cluster]
+    B -->|Notificaciones| E[Slack/Teams Webhooks]
+    
+    subgraph Resilience Layer
+        F[Circuit Breaker / Resilience4j]
+        G[Retry Logic / Jitter]
+        H[Sliding Window Limiter]
+    end
+    
+    B --> F
+    B --> G
+    B --> H
 ```
 
-## 📚 API Documentation
+### Decisiones de Arquitectura Senior:
+* **Desacoplamiento Estricto:** Capa de dominio pura libre de dependencias o anotaciones de persistencia relacional. Traspaso de datos mediante Mappers de alto rendimiento.
+* **Control de Errores RFC 7807:** Manejo centralizado de excepciones con `@ControllerAdvice` que devuelve respuestas semánticas estandarizadas (*Problem Details*).
 
-### Endpoints Principales
-- `POST /api/v1/convocatoria` - Create convocatoria
-- `GET /health/live` - Liveness probe (K8s)
-- `GET /health/ready` - Readiness probe (K8s)
-- `GET /metrics` - Prometheus metrics
+---
 
-### Health Check Response
+## 🛠️ Stack Tecnológico
+
+| Capa / Componente | Tecnología | Propósito Técnico |
+| :--- | :--- | :--- |
+| **Backend Core** | Java 17 / Spring Boot 3.x | Uso nativo de Records, patrones de coincidencia avanzados y optimización de la JVM. |
+| **Resiliencia** | Resilience4j / Redis | Aislamiento de fallos, tolerancia y cuotas de peticiones controladas por IP/Usuario. |
+| **Persistencia** | PostgreSQL / JPA / Hibernate | Almacenamiento seguro, transaccional y relacional compatible con el estándar ACID. |
+| **Monitoreo** | Spring Actuator + Prometheus | Instrumentación integrada para raspado (*scraping*) continuo de métricas en tiempo real. |
+
+---
+
+## ⚙️ Guía de Despliegue Rápido (Quick Start)
+
+### Requisitos previos:
+* [Docker Desktop](https://docker.com) instalado y en ejecución.
+
+### Instrucciones de ejecución:
+1. Clonar el repositorio y acceder al directorio raíz:
+   ```bash
+   git clone https://github.com
+   cd automatizacion-convocatorias
+   ```
+2. Configurar variables de entorno iniciales:
+   ```bash
+   cp .env.example .env
+   # Edite el archivo .env con sus credenciales de base de datos y llaves JWT
+   ```
+3. Orquestar y levantar el ecosistema completo (Contenedores en segundo plano):
+   ```bash
+   docker-compose up --build -d
+   ```
+
+*La API transaccional estará disponible de inmediato en `http://localhost:8080`.*
+
+---
+
+## 📚 Documentación de APIs & Calidad
+
+### Endpoints de Infraestructura y Negocio
+* `POST /api/v1/convocatoria` - Creación y parametrización de nuevas bases de concurso.
+* `GET /actuator/health/liveness` - Estado de ejecución del hilo principal del servidor de aplicaciones.
+* `GET /actuator/health/readiness` - Estado de la conectividad aguas abajo con PostgreSQL y bases distribuidas en Redis.
+* `GET /actuator/prometheus` - Exposición de telemetría de recolección de basura e hilos activos de Tomcat.
+
+### Estructura de Respuesta de Salud (Health Check)
 ```json
 {
-  "status": "ready",
-  "timestamp": "2026-07-08T23:42:00Z",
-  "uptime_seconds": 3600,
-  "checks": {
-    "application": {"status": "ok"},
-    "database": {"status": "ok"}
+  "status": "UP",
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "PostgreSQL",
+        "validationQuery": "isValid()"
+      }
+    },
+    "redis": {
+      "status": "UP",
+      "details": {
+        "version": "7.2"
+      }
+    }
   }
 }
 ```
 
-## 🛠️ Development
-
+### Estrategia de Pruebas Automáticas
+Aseguramos la integridad de las reglas de negocio a través de una suite rigurosa de control de calidad integrada en el pipeline de CI/CD:
 ```bash
-# Run tests
-pytest tests/ -v --cov=src
+# Ejecución automatizada de pruebas unitarias y de integración
+mvn clean test
 
-# Lint
-flake8 src/ tests/
-mypy src/ --ignore-missing-imports
+# Verificación estática de calidad de código y cobertura
+mvn jacoco:report
 ```
+---
 
-## 📦 Deployment
-
-```bash
-# Helm
-helm upgrade --install convocatorias ./helm-chart/convocatorias-ai
-
-# Docker
-docker build -t convocatorias-ai .
-docker push ghcr.io/automatizacion-convocatorias/convocatorias-ai
-```
-
-## 🏗️ Architecture
-
-```mermaid
-graph TD
-    A[FastAPI Backend] --> B[PostgreSQL]
-    A --> C[Redis Cache]
-    A --> D[Google Calendar API]
-    A --> E[Slack/Teams Webhooks]
-    
-    subgraph Resilience
-        F[Circuit Breaker]
-        G[Retry Logic]
-        H[Rate Limiter]
-    end
-    
-    A --> F
-    A --> G
-    A --> H
-```
