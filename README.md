@@ -8,6 +8,7 @@
 ![CI/CD](https://shields.io)
 ![Observabilidad](https://shields.io)
 
+
 Plataforma corporativa de nivel *enterprise* para la automatización integral, gestión y procesamiento distribuido de convocatorias académicas y administrativas.
 
 ---
