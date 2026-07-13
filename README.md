@@ -1,12 +1,14 @@
 # Automatización de Convocatorias 🚀
 ### Sistema Empresarial Core para Gestión y Procesamiento de Convocatorias
 
-![Build Status](https://shields.io)
-![Java Version](https://shields.io)
-![Spring Boot](https://shields.io)
-![Docker Ready](https://shields.io)
-![CI/CD](https://shields.io)
-![Observabilidad](https://shields.io)
+<p align="left">
+  <img src="https://shields.io" alt="Build Status" />
+  <img src="https://shields.io" alt="Java Version" />
+  <img src="https://shields.io" alt="Spring Boot" />
+  <img src="https://shields.io" alt="Docker Ready" />
+  <img src="https://shields.io" alt="CI/CD" />
+  <img src="https://shields.io" alt="Observabilidad" />
+</p>
 
 
 Plataforma corporativa de nivel *enterprise* para la automatización integral, gestión y procesamiento distribuido de convocatorias académicas y administrativas.
